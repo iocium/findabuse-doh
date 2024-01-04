@@ -1,0 +1,9 @@
+name = "findabuse-doh"
+main = "src/index.ts"
+compatibility_date = "2023-12-18"
+node_compat = true
+account_id = "b0d7b9f87b57470ef508f1a511093cae"
+
+routes = [
+    { pattern = "doh.findabuse.email/*", zone_name = "findabuse.email" },
+]

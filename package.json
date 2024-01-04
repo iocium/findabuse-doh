@@ -1,0 +1,21 @@
+{
+  "name": "findabuse-doh",
+  "version": "2024.1.0",
+  "private": true,
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev",
+    "start": "wrangler dev"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20231218.0",
+    "@types/validator": "^13.11.7",
+    "typescript": "^5.0.4",
+    "wrangler": "^3.0.0"
+  },
+  "dependencies": {
+    "dns-packet": "^5.6.1",
+    "itty-router": "^4.0.25",
+    "validator": "^13.11.0"
+  }
+}
