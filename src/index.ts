@@ -50,7 +50,11 @@ router.get('/dns-query', async (request, env, context) => {
 
     // Now, we know we only respond to TXT queries, anything else has no data
     if (t.type !== 'query') {
-        return new Response(dnsPacket.encode(resp))
+        return new Response(dnsPacket.encode(resp), {
+            headers: {
+                'Content-Type': 'application/dns-message'
+            }
+        })
     }
 
     for (let q of t.questions) {
@@ -69,9 +73,19 @@ router.get('/dns-query', async (request, env, context) => {
 
             // Now, we need to reverse this address, so it can be looked up
             let ip: any;
-            if (addrClass == 4) ip = Address4.fromArpa(`${subject}.in-addr.arpa.`)
-            if (addrClass == 6) ip = Address6.fromArpa(`${subject}.ip6.arpa.`); 
-            subject = ip.correctForm();
+            try {
+                if (addrClass == 4) ip = Address4.fromArpa(`${subject}.in-addr.arpa.`)
+                if (addrClass == 6) ip = Address6.fromArpa(`${subject}.ip6.arpa.`); 
+                subject = ip.correctForm();
+            }
+            catch(e: any) {
+                return new Response(dnsPacket.encode(resp), {
+                    headers: {
+                        'Content-Type': 'application/dns-message'
+                    }
+                })
+            }
+            
 
             // And validate our conversion
             if (validator.isIP(subject)) {
