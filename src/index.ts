@@ -10,11 +10,13 @@ const router = Router()
 let replacements: any = {
     4: [
         'in-addr.arpa',
-        'dns.findabuse.email'
+        'dns.findabuse.email',
+        'origin.asn.cymru.com'
     ],
     6: [
         'ip6.arpa',
-        'dns6.findabuse.email'
+        'dns6.findabuse.email',
+        'origin6.asn.cymru.com'
     ]
 }
 
