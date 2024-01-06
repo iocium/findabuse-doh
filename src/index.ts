@@ -1,11 +1,22 @@
 import { Router } from 'itty-router';
 import { Buffer } from 'node:buffer';
+import {Address4, Address6} from 'ip-address';
 import validator from 'validator';
 import dnsPacket from 'dns-packet';
 import Package from '../package-lock.json';
 
 export interface Env {}
 const router = Router()
+let replacements: any = {
+    4: [
+        'in-addr.arpa',
+        'dns.findabuse.email'
+    ],
+    6: [
+        'ip6.arpa',
+        'dns6.findabuse.email'
+    ]
+}
 
 router.get('/dns-query', async (request, env, context) => {
     // First, grab some request information
@@ -44,8 +55,25 @@ router.get('/dns-query', async (request, env, context) => {
 
     for (let q of t.questions) {
         if (q.type == 'TXT') {
-            let subject: any = q.name.replaceAll('.abuse.email', '');
+            let subject: any = q.name;
+            let addrClass: any = 4;
 
+            for (let cls of Object.keys(replacements)) {
+                for (let repl of replacements[cls]) {
+                    if (subject.includes(repl)) {
+                        addrClass = cls;
+                        subject = subject.replaceAll(`.${repl}`, '');
+                    }
+                }
+            }
+
+            // Now, we need to reverse this address, so it can be looked up
+            let ip: any;
+            if (addrClass == 4) ip = Address4.fromArpa(`${subject}.in-addr.arpa.`)
+            if (addrClass == 6) ip = Address6.fromArpa(`${subject}.ip6.arpa.`); 
+            subject = ip.correctForm();
+
+            // And validate our conversion
             if (validator.isIP(subject)) {
                 // So now, we're going to fetch data
                 let upstream: any = env.UPSTREAM || 'api.findabuse.email';
@@ -80,7 +108,7 @@ router.get('/dns-query', async (request, env, context) => {
     })
 })
 
-router.get('/', (request, env, context) => {
+router.get('/version', (request, env, context) => {
     return new Response(Package.version);
 })
 
