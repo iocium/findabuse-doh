@@ -20,18 +20,31 @@ let replacements: any = {
     ]
 }
 
-router.get('/dns-query', async (request, env, context) => {
+router.all('/dns-query', async (request, env, context) => {
     // First, grab some request information
 	let url: any = new URL(request.url)
 
+    // Now, we refuse anything that isn't GET or POST
+    if (!['GET', 'POST'].includes(request.method)) {
+        return new Response('Not Found.', { status: 404 })
+    }
+
 	// And grab the question
 	let q: any = null;
-	if (request.query.dns) {
-		q = request.query.dns;
-	}
-	else {
-		return new Response('Missing query in ?dns=', { status: 400 })
-	}
+
+    if (request.method == 'GET') {
+        if (request.query.dns) {
+            q = request.query.dns;
+        }
+        else {
+            return new Response('Missing query in ?dns=', { status: 400 })
+        }
+    }
+    if (request.method == 'POST') {
+        q = await request.arrayBuffer();
+	    q = Buffer.from(q);
+    }
+
 
 	// Now, to validate the payload
 	let t: any;
